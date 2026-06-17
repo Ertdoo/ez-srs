@@ -1,0 +1,9 @@
+# .gitignore
+config/
+.env
+*.env
+database.php
+db_config.php
+includes/db.php
+secrets/
+credentials/
