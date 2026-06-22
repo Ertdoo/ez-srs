@@ -1,9 +1,9 @@
 <!-- menubar_new.php -->
 <!-- logout logic is now handled in land_logout.php -->
-<?php
-  // determine current script for nav highlighting
-  $current = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-?>
+<?php // determine current script for nav highlighting
+// determine current script for nav highlighting
+// determine current script for nav highlighting
+$current = basename(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)); ?>
 <style>
   /* Dim non-active nav links and highlight the active section */
   #main-navbar .nav-link { opacity: 0.75; transition: opacity .15s ease, transform .12s ease, font-size .12s ease; }
@@ -32,7 +32,7 @@
 
 <nav class="navbar navbar-expand-md fixed-top" id="main-navbar">
   <div class="container-fluid">
-    <?php if (isset($_SESSION['username'])): ?>
+    <?php if (isset($_SESSION["username"])): ?>
       <a class="navbar-brand" href="user_dashboard.php">Easy Spaced Repition - Home</a>
     <?php else: ?>
       <a class="navbar-brand" href="index.php">Easy Spaced Repition</a>
@@ -45,37 +45,53 @@
 
     <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
       <ul class="navbar-nav me-auto">
-        <?php if (isset($_SESSION['username'])): ?>
-          <a class="nav-link<?php echo ($current === 'study.php') ? ' active-section' : ''; ?>" href="study.php" style="color: Coral">Study!</a>
-          <a class="nav-link<?php echo ($current === 'decks.php') ? ' active-section' : ''; ?>" href="decks.php" style="color: Orange">Manage decks</a>
-          <a class="nav-link<?php echo ($current === 'deck_create.php') ? ' active-section' : ''; ?>" href="deck_create.php" style="color: MediumSeaGreen">Create new deck</a>
+        <?php if (isset($_SESSION["username"])): ?>
+          <a class="nav-link<?php echo $current === "study.php"
+              ? " active-section"
+              : ""; ?>" href="study.php" style="color: Coral">Study!</a>
+          <a class="nav-link<?php echo $current === "decks.php"
+              ? " active-section"
+              : ""; ?>" href="decks.php" style="color: Orange">Manage decks</a>
+          <a class="nav-link<?php echo $current === "deck_create.php"
+              ? " active-section"
+              : ""; ?>" href="deck_create.php" style="color: MediumSeaGreen">Create new deck</a>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?php echo ($current === 'land_browse.php' || $current === 'decks.php') ? ' active-section' : ''; ?>" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle<?php echo $current ===
+                "land_browse.php" || $current === "decks.php"
+                ? " active-section"
+                : ""; ?>" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Explore decks
             </a>
             <ul class="dropdown-menu" aria-labelledby="exploreDropdown">
-              <li><a class="dropdown-item" href="land_browse.php">All Decks</a></li>
-              <li><a class="dropdown-item" href="land_browse.php?filter=popular">Popular</a></li>
-              <li><a class="dropdown-item" href="land_browse.php?filter=recent">Recently Added</a></li>
+              <li><a class="dropdown-item" href="deck_browse.php">All Decks</a></li>
+              <li><a class="dropdown-item" href="deck_browse.php?filter=popular">Popular</a></li>
+              <li><a class="dropdown-item" href="deck_browse.php?filter=recent">Recently Added</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="decks.php">My Decks</a></li>
             </ul>
           </li>
-          <a class="nav-link<?php echo ($current === 'land_about.php') ? ' active-section' : ''; ?>" href="land_about.php">About</a>
+          <a class="nav-link<?php echo $current === "land_about.php"
+              ? " active-section"
+              : ""; ?>" href="land_about.php">About</a>
         <?php else: ?>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?php echo ($current === 'land_browse.php' || $current === 'decks.php') ? ' active-section' : ''; ?>" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle<?php echo $current ===
+                "deck_browse.php" || $current === "decks.php"
+                ? " active-section"
+                : ""; ?>" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Explore decks
             </a>
             <ul class="dropdown-menu" aria-labelledby="exploreDropdown">
-              <li><a class="dropdown-item" href="land_browse.php">All Decks</a></li>
-              <li><a class="dropdown-item" href="land_browse.php?filter=popular">Popular</a></li>
-              <li><a class="dropdown-item" href="land_browse.php?filter=recent">Recently Added</a></li>
+              <li><a class="dropdown-item" href="deck_browse.php">All Decks</a></li>
+              <li><a class="dropdown-item" href="deck_browse.php?filter=popular">Popular</a></li>
+              <li><a class="dropdown-item" href="deck_browse.php?filter=recent">Recently Added</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="decks.php">My Decks</a></li>
             </ul>
           </li>
-          <a class="nav-link<?php echo ($current === 'land_about.php') ? ' active-section' : ''; ?>" href="land_about.php">About</a>
+          <a class="nav-link<?php echo $current === "land_about.php"
+              ? " active-section"
+              : ""; ?>" href="land_about.php">About</a>
         <?php endif; ?>
         <!-- <li class="nav-item dropdown ms-5">
           <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -115,17 +131,21 @@
 
       <!-- Login/Logout Buttons -->
       <ul class="navbar-nav ms-auto">
-        <?php if (isset($_SESSION['username'])): ?>
+        <?php if (isset($_SESSION["username"])): ?>
           <li class="nav-item ms-2 d-flex align-items-center gap-2">
-            <?php echo htmlspecialchars($_SESSION['username']);?>
+            <?php echo htmlspecialchars($_SESSION["username"]); ?>
             <a class="btn btn-outline-danger btn-sm" href="land_logout.php">Logout</a>
           </li>
         <?php else: ?>
           <li class="nav-item ms-2 d-flex align-items-center"> <!-- gap-2 for button alignment -->
-            <a class="nav-link<?php echo ($current === 'land_login.php') ? ' active-section' : ''; ?>" href="land_login.php">Login</a>
+            <a class="nav-link<?php echo $current === "land_login.php"
+                ? " active-section"
+                : ""; ?>" href="land_login.php">Login</a>
           </li>
           <li class="nav-item ms-2 d-flex align-items-center">
-            <a class="nav-link<?php echo ($current === 'land_register.php') ? ' active-section' : ''; ?>" href="land_register.php">Register</a>
+            <a class="nav-link<?php echo $current === "land_register.php"
+                ? " active-section"
+                : ""; ?>" href="land_register.php">Register</a>
           </li>
         <?php endif; ?>
       </ul>
