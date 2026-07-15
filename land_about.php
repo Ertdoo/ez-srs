@@ -15,7 +15,7 @@
                 but decks can be shared and edited by multiple users natively, with a Git style proposal and review system instead of free for all chaos.
                 Its highly recommended to finish all your due cards everyday, to make the most of the algorithm. I may add a feature to pause decks and/or adjust the amount of new cards shown each day.
             </p>
-            This project is open source ig. -> <a href="https://github.com/Ertdoo/ez-srs">GitHub</a>
+            This project is open source ig. -> <a href="https://github.com/Ertdoo/ez-srs">https://github.com/Ertdoo/ez-srs</a>
         </section>
 
         <hr>
@@ -81,9 +81,6 @@
 
         <hr>
 
-        <!-- ============================================= -->
-        <!-- HOW COLLABORATION WORKS -->
-        <!-- ============================================= -->
         <section id="how-collab-works" class="mb-5">
             <h2>How collaboration works</h2>
             <p>
@@ -111,9 +108,6 @@
 
         <hr>
 
-        <!-- ============================================= -->
-        <!-- FAQ -->
-        <!-- ============================================= -->
         <section id="faq" class="mb-5">
             <h2>FAQ</h2>
 
@@ -157,9 +151,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- duplicate accordion-item blocks above for more questions -->
-
             </div>
         </section>
 
@@ -168,7 +159,7 @@
         <section id="creator" class="mb-5">
             <h2>About the creator</h2>
             <p>
-                Built for software development units 3&4 SAT
+                This was built for VCE software development units 3&4 SAT
             </p>
         </section>
 

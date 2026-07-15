@@ -63,6 +63,7 @@ SELECT
     decks.description,
     decks.is_public,
     decks.created_at,
+    decks.user_id AS deck_user_id,
     COUNT(cards.id) AS total_cards
 FROM decks
 LEFT JOIN cards ON decks.id = cards.deck_id
@@ -73,7 +74,7 @@ WHERE decks.user_id = ?
         WHERE deck_contributors.user_id = ?
           AND deck_contributors.status = 'accepted'
     )
-GROUP BY decks.id, decks.title, decks.description, decks.is_public, decks.created_at
+GROUP BY decks.id, decks.title, decks.description, decks.is_public, decks.created_at, decks.user_id
 ORDER BY decks.created_at DESC
 LIMIT ? OFFSET ?
 ";
@@ -178,6 +179,8 @@ $result = $stmt->get_result();
                 <tbody>
                     <?php if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
+                            $is_owner = ($row["deck_user_id"] == $user_id);
+
                             echo "<tr>";
                             echo "<td>" .
                                 mb_substr(
@@ -202,12 +205,18 @@ $result = $stmt->get_result();
                                 "</td>";
                             echo "<td>" . $row["total_cards"] . "</td>";
                             echo "<td>";
-                            echo '<form action="deck_delete_DCREATE.php" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure matey?\');">
-                                <input type="hidden" name="deck_id" value="' .
-                                intval($row["deck_id"]) .
-                                '">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                            </form>';
+
+                            if ($is_owner) {
+                                echo '<form action="deck_delete_DCREATE.php" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure matey?\');">
+                                    <input type="hidden" name="deck_id" value="' .
+                                    intval($row["deck_id"]) .
+                                    '">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>';
+                            } else {
+                                echo '<span class="badge bg-secondary">Editor</span>';
+                            }
+
                             echo "</td>";
                             echo "</tr>";
                         }

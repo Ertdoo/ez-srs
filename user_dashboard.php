@@ -8,7 +8,7 @@
             --primary: #0d47a1;
             --secondary: #00796b;
             --background: #0d101f;
-            --card-bg: #1c1f26; /* kept for anywhere else in the app that still uses it */
+            --card-bg: #1c1f26;
             --text: #f0f0f0;
             --text-light: #b0b0b0;
             --accent: #c62828;
@@ -24,7 +24,6 @@
             align-items: start;
             margin-top: 20px;
         }
-        /* ---------- LEFT COLUMN ---------- */
         .left-column {
             display: flex;
             flex-direction: column;
@@ -67,7 +66,6 @@
             padding: 0 4px;
             line-height: 1;
         }
-        /* Compact "cards due" panel, left column */
         .due-panel {
             background-color: var(--card-fill);
             backdrop-filter: blur(6px);
@@ -119,11 +117,9 @@
             font-style: italic;
             font-size: 0.85rem;
         }
-        /* thin scrollbar for the due list */
         .due-list::-webkit-scrollbar { width: 5px; }
         .due-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 
-        /* ---------- RIGHT COLUMN ---------- */
         .analytics-column {
             display: flex;
             flex-direction: column;
@@ -163,7 +159,6 @@
         .deck-select:focus {
             outline: 1px solid var(--secondary);
         }
-        /* Streak + heatmap */
         .streak-label {
             font-weight: 700;
             margin-bottom: 12px;
@@ -191,9 +186,9 @@
         .heatmap-cell[data-level="2"] { background-color: var(--secondary); }
         .heatmap-cell[data-level="3"] { background-color: #7bc96f; }
         .heatmap-cell[data-level="4"] { background-color: #c6e6c1; }
-        /* Pie chart */
         .pie-wrapper {
-            max-width: 260px;
+            max-width: 400px; /* Increased from 260px to fit chart + right legend */
+            width: 100%;
             margin: 0 auto;
         }
     </style>
@@ -204,7 +199,8 @@
         <p>Here yer plunder, <?php echo htmlspecialchars($_SESSION['username']); ?>!</p>
         <?php
         $user_id = $_SESSION['user_id'];
-        // --- Proposals badge count ---
+
+        // --- Proposals badge count (Only for decks you OWN) ---
         $proposal_count = 0;
         $stmt = $conn->prepare(
             "SELECT COUNT(*) AS cnt
@@ -219,8 +215,9 @@
             $proposal_count = (int) $row['cnt'];
         }
         $stmt->close();
+
         // --- Heatmap data: reviews per day for the last year ---
-        $heatmap_data = []; // 'Y-m-d' => count
+        $heatmap_data = [];
         $stmt = $conn->prepare(
             "SELECT DATE(reviewed_at) AS day, COUNT(*) AS reviews
              FROM study_sessions
@@ -240,7 +237,7 @@
         $year = $today->format('Y');
 
         $gridStart = new DateTime("$year-01-01");
-        $gridStart->modify('-' . $gridStart->format('w') . ' days'); // snap back to Sunday
+        $gridStart->modify('-' . $gridStart->format('w') . ' days');
 
         $gridEnd = new DateTime("$year-12-31");
 
@@ -255,7 +252,7 @@
                     'date' => $dateStr,
                     'count' => $count,
                     'future' => $cursor > $today,
-                    'outside_year' => $cursor->format('Y') != $year, // padding days from snapping to Sunday
+                    'outside_year' => $cursor->format('Y') != $year,
                 ];
                 $cursor->modify('+1 day');
             }
@@ -268,13 +265,13 @@
             if ($count <= 25) return 3;
             return 4;
         }
+
         // Streak: walk backward from today counting consecutive studied days
         $streak = 0;
         $cursor = clone $today;
         $todayStr = $today->format('Y-m-d');
 
         if (($heatmap_data[$todayStr] ?? 0) == 0) {
-            // haven't studied today yet — start counting from yesterday instead
             $cursor->modify('-1 day');
         }
 
@@ -287,7 +284,8 @@
                 break;
             }
         }
-        // --- Cards due, grouped by deck (includes never-studied cards as due) ---
+
+        // --- Cards due, grouped by deck (INCLUDES COLLABORATOR DECKS) ---
         $due_by_deck = [];
         $stmt = $conn->prepare(
             "SELECT d.title,
@@ -299,18 +297,25 @@
              ) latest ON latest.card_id = c.id
              LEFT JOIN study_sessions ss ON ss.id = latest.max_id
              WHERE d.user_id = ?
+                OR d.id IN (
+                    SELECT deck_contributors.deck_id
+                    FROM deck_contributors
+                    WHERE deck_contributors.user_id = ?
+                      AND deck_contributors.status = 'accepted'
+                )
              GROUP BY d.id, d.title
              HAVING due_count > 0
              ORDER BY due_count DESC"
         );
-        $stmt->bind_param("ii", $user_id, $user_id);
+        $stmt->bind_param("iii", $user_id, $user_id, $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) {
             $due_by_deck[] = $row;
         }
         $stmt->close();
-        // --- Card counts by state (New / Learning / Young / Mature) — overall ---
+
+        // --- Card counts by state (New / Learning / Young / Mature) — overall (INCLUDES COLLABORATOR DECKS) ---
         $card_states = ['New' => 0, 'Learning' => 0, 'Young' => 0, 'Mature' => 0];
         $stmt = $conn->prepare(
             "SELECT
@@ -328,17 +333,24 @@
              ) latest ON latest.card_id = c.id
              LEFT JOIN study_sessions ss ON ss.id = latest.max_id
              WHERE d.user_id = ?
+                OR d.id IN (
+                    SELECT deck_contributors.deck_id
+                    FROM deck_contributors
+                    WHERE deck_contributors.user_id = ?
+                      AND deck_contributors.status = 'accepted'
+                )
              GROUP BY state"
         );
-        $stmt->bind_param("ii", $user_id, $user_id);
+        $stmt->bind_param("iii", $user_id, $user_id, $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) {
             $card_states[$row['state']] = (int) $row['cnt'];
         }
         $stmt->close();
-        // --- Card counts by state, PER DECK (for the pie chart dropdown) ---
-        $deck_states = []; // deck_id => ['title' => ..., 'states' => ['New'=>x, ...]]
+
+        // --- Card counts by state, PER DECK (for the pie chart dropdown) (INCLUDES COLLABORATOR DECKS) ---
+        $deck_states = [];
         $stmt = $conn->prepare(
             "SELECT d.id AS deck_id, d.title,
                 CASE
@@ -355,9 +367,15 @@
              ) latest ON latest.card_id = c.id
              LEFT JOIN study_sessions ss ON ss.id = latest.max_id
              WHERE d.user_id = ?
+                OR d.id IN (
+                    SELECT deck_contributors.deck_id
+                    FROM deck_contributors
+                    WHERE deck_contributors.user_id = ?
+                      AND deck_contributors.status = 'accepted'
+                )
              GROUP BY d.id, d.title, state"
         );
-        $stmt->bind_param("ii", $user_id, $user_id);
+        $stmt->bind_param("iii", $user_id, $user_id, $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) {
@@ -437,8 +455,6 @@
         </div>
     </main>
     <script>
-        // All decks' state breakdown, keyed by deck id, plus an "all" total —
-        // built server-side so the dropdown can switch instantly with no extra requests.
         const deckStateData = {
             all: {
                 labels: ['New', 'Learning', 'Young', 'Mature'],
@@ -473,8 +489,34 @@
                 }]
             },
             options: {
+                responsive: true,
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#f0f0f0', // Fixes dark theme text color
+                            boxWidth: 15,
+                            padding: 15,
+                            // Custom label generator to include the numbers
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        return {
+                                            text: `${label}: ${value}`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            strokeStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: isNaN(data.datasets[0].data[i]) || chart.getDatasetMeta(0).data[i].hidden,
+                                            index: i,
+                                            fontColor: '#f0f0f0' // Fallback for older Chart.js versions
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    }
                 }
             }
         });
