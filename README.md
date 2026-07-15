@@ -1,6 +1,7 @@
 # ez-srs — Easy Spaced Repetition
 
 https://ez-srs.duckdns.org/index.php
+<br>
 A self-hosted, collaborative spaced repetition system (genuinley an Anki clone, but web based on PHP,JS,HTML and also includes collaborative features).
 Users can create decks, share with others, propose edits to shared cards, and study using an
 Anki-style scheduling algorithm
