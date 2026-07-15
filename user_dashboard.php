@@ -379,7 +379,7 @@
                     <a href="study.php" class="button-class" style="color: Tomato">Study!</a>
                     <a href="decks.php" class="button-class" style="color: Orange">Manage decks</a>
                     <a href="deck_create.php" class="button-class" style="color: MediumSeaGreen">Create new deck</a>
-                    <a href="proposals.php" class="button-class" style="color: DodgerBlue">
+                    <a href="deck_review_proposals.php" class="button-class" style="color: DodgerBlue">
                         Proposals
                         <?php if ($proposal_count > 0): ?>
                             <span class="badge-alert"><?php echo $proposal_count; ?></span>
