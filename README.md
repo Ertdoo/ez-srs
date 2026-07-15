@@ -1,4 +1,31 @@
-# Easy Spaced Repitition
-collaborative spaced repition web-based software
-<br>
-database schema add soon
+# ez-srs — Easy Spaced Repetition
+
+A self-hosted, collaborative spaced repetition system (genuinly an Anki clone, but web based on PHP,JS,HTML and also includes collaborative features).
+Users can create decks, share with others, propose edits to shared cards, and study using an
+Anki-style scheduling algorithm
+
+## Features
+- User accounts (register/login) with per-user daily new-card limits
+- Create and browse decks, public or private
+- Cards support basic Q&A, cloze, and image types
+- Deck collaboration: invite contributors as owner/editor/viewer
+- Card proposals (git style): contributors can propose add/edit/delete changes to shared decks,
+  which the owner can merge or reject
+- Tagging system for cards
+- Deck ratings/reviews
+- Anki-style spaced repetition scheduler (ease factor, intervals, learning steps)
+- Activity log (deck creation, studying, proposals, merges, etc.) in the database
+
+## Tech stack
+- PHP (mysqli) + MySQL/MariaDB
+- Vanilla JS, HTML, CSS
+- phpMyAdmin included (i f***ed up the server)
+- PHP 8+ with the mysqli extension
+- MySQL (i should use mariaDB)
+- A web server (i use Apache on NixOS (holy larp))
+
+## Status
+school project for sofdev units 3&4, prolly abandon this soon
+
+## License
+MIT
