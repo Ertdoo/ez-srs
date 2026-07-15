@@ -145,7 +145,7 @@ $result = $stmt->get_result();
                         <label for="deck_collab" class="form-label">Collaborators:</label>
                     </div>
                     <div class="col-sm-8">
-                        <input type="text" id="deck_collab" name="deck_collab" class="form-control" style="width: 300px;" maxlength="100" placeholder="Max 100 characters matey!">
+                        <input type="text" id="deck_collab" name="deck_collab" class="form-control" style="width: 300px;" maxlength="100" placeholder="Usernames seperated by commas">
                     </div>
                 </div>
 

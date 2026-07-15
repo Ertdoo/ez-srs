@@ -1,21 +1,23 @@
-<?php $conn = include "connect.php";
-
-if (isset($_SESSION["username"])) {
-    $username = $_SESSION["username"];
-    $user_id = $_SESSION["user_id"];
-} else {
-    die(
-        '<br><h1>Yer not logged in matey!</h1><br><a href="land_login.php">Go to login</a>'
-    );
+<?php
+// 1. Ensure session is started (if not already handled in connect.php)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
+
+$conn = include "connect.php";
+
+// 2. Check login status without forcing a die()
+$is_logged_in = isset($_SESSION["username"]);
+$username = $is_logged_in ? $_SESSION["username"] : null;
+$user_id = $is_logged_in ? (int) $_SESSION["user_id"] : null;
 
 $deck_id = isset($_GET["id"]) ? (int) $_GET["id"] : 0;
 
 if ($deck_id <= 0) {
-    die(
-        '<br><h1>No deck specified, matey!</h1><br><a href="public-decks.php">Go back to browsing</a>'
-    );
+    die('<br><h1>No deck specified, matey!</h1><br><a href="deck_view.php">Go back to browsing</a>');
 }
+
+
 
 // Flash messages (fork/subscribe actions can set these)
 $message = "";
@@ -51,33 +53,43 @@ $stmt->execute();
 $deck = $stmt->get_result()->fetch_assoc();
 
 if (!$deck) {
-    die(
-        '<br><h1>Deck not found, matey!</h1><br><a href="public-decks.php">Go back to browsing</a>'
-    );
+    die('<br><h1>Deck not found, matey!</h1><br><a href="public-decks.php">Go back to browsing</a>');
 }
 
-$is_owner = $deck["owner_id"] == $user_id;
+// Optional: Block guests from viewing private decks
+if ($deck["is_public"] == 0) {
+    die('<br><h1>This deck is private, matey!</h1><br><a href="land_login.php">Log in to request access</a>');
+}
 
-// Check deck_contributors for an existing relationship (subscribed, editor, etc.)
-$contrib_query = "
-SELECT role, status
-FROM deck_contributors
-WHERE deck_id = ? AND user_id = ?
-";
-$stmt2 = $conn->prepare($contrib_query);
-$stmt2->bind_param("ii", $deck_id, $user_id);
-$stmt2->execute();
-$contributor = $stmt2->get_result()->fetch_assoc();
+// 3. Only consider them the owner if they are logged in AND their user_id matches
+$is_owner = $is_logged_in && ($deck["owner_id"] == $user_id);
 
-$is_subscribed =
-    $contributor &&
-    $contributor["role"] === "viewer" &&
-    $contributor["status"] === "accepted";
+// 4. Check deck_contributors ONLY if the user is logged in
+$contributor = null;
+$is_subscribed = false;
+$is_contributor_other_role = false;
 
-$is_contributor_other_role =
-    $contributor &&
-    $contributor["role"] !== "viewer" &&
-    $contributor["status"] === "accepted";
+if ($is_logged_in) {
+    $contrib_query = "
+    SELECT role, status
+    FROM deck_contributors
+    WHERE deck_id = ? AND user_id = ?
+    ";
+    $stmt2 = $conn->prepare($contrib_query);
+    $stmt2->bind_param("ii", $deck_id, $user_id);
+    $stmt2->execute();
+    $contributor = $stmt2->get_result()->fetch_assoc();
+
+    $is_subscribed =
+        $contributor &&
+        $contributor["role"] === "viewer" &&
+        $contributor["status"] === "accepted";
+
+    $is_contributor_other_role =
+        $contributor &&
+        $contributor["role"] !== "viewer" &&
+        $contributor["status"] === "accepted";
+}
 
 // Fetch up to 5 sample cards for the preview
 $cards_query = "
@@ -100,7 +112,7 @@ $cards_result = $stmt3->get_result();
     .repo-banner {
         border-bottom: 1px solid #2a2f4a;
         padding-bottom: 16px;
-        margin-bottom: 24px;
+        margin-bottom: 16px;
     }
     .repo-banner-path {
         font-size: 1.6rem;
@@ -123,24 +135,32 @@ $cards_result = $stmt3->get_result();
         font-size: 0.85rem;
         margin-top: 4px;
     }
+
+    /* --- UPDATED README STYLES --- */
     .readme-box {
-        background: #161929;
-        border: 1px solid #2a2f4a;
-        border-radius: 8px;
-        padding: 20px;
+        background: transparent;
+        border: none;
+        padding: 0;
         color: #d2d6ee;
-        white-space: pre-wrap;
         margin-bottom: 30px;
+        line-height: 1.6;
+        /* no white-space here */
     }
     .readme-box-header {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: #6e7390;
-        margin-bottom: 10px;
+        color: #7ec87e;
+        margin: 0 0 16px;
         border-bottom: 1px solid #2a2f4a;
         padding-bottom: 8px;
+        font-weight: 600;
     }
+    .readme-box-content {
+        white-space: pre-wrap;
+    }
+    /* --------------------------- */
+
     .card-preview-table th {
         color: #6e7390;
         font-size: 0.8rem;
@@ -172,63 +192,57 @@ $cards_result = $stmt3->get_result();
         <div class="alert alert-danger"><?= htmlspecialchars($message) ?></div>
     <?php endif; ?>
     <?php if ($message_success): ?>
-        <div class="alert alert-success"><?= htmlspecialchars(
-            $message_success,
-        ) ?></div>
+        <div class="alert alert-success"><?= htmlspecialchars($message_success) ?></div>
     <?php endif; ?>
 
     <div class="repo-banner d-flex justify-content-between align-items-start flex-wrap" style="gap:16px">
         <div>
             <div class="repo-banner-path">
-                <span class="owner"><?= htmlspecialchars(
-                    $deck["creator"] ?? "Unknown",
-                ) ?></span>
+                <span class="owner"><?= htmlspecialchars($deck["creator"] ?? "Unknown") ?></span>
                 <span class="sep">/</span>
-                <span class="title"><?= htmlspecialchars(
-                    $deck["title"],
-                ) ?></span>
+                <span class="title"><?= htmlspecialchars($deck["title"]) ?></span>
             </div>
             <div class="repo-banner-meta">
                 Created <?= date("M j, Y", strtotime($deck["created_at"])) ?>
-                &middot; <?= intval($deck["total_cards"]) ?> card<?= $deck[
-     "total_cards"
- ] == 1
-     ? ""
-     : "s" ?>
+                &middot; <?= intval($deck["total_cards"]) ?> card<?= $deck["total_cards"] == 1 ? "" : "s" ?>
                 &middot; <?= $deck["is_public"] ? "Public" : "Private" ?>
             </div>
         </div>
 
+        <!-- 5. Updated Button Logic -->
         <div class="d-flex" style="gap:8px">
             <?php if ($is_owner): ?>
-                <a href="deck_edit.php?id=<?= $deck_id ?>" class="btn btn-outline-primary">Edit Deck</a>
+                <a href="deck_details.php?id=<?= $deck_id ?>" class="btn btn-outline-primary">Edit Deck</a>
             <?php else: ?>
-                <?php if ($is_subscribed): ?>
-                    <button class="btn btn-outline-secondary" disabled>Subscribed</button>
-                <?php elseif ($is_contributor_other_role): ?>
-                    <button class="btn btn-outline-secondary" disabled>Collaborator</button>
-                <?php else: ?>
-                    <form action="classes/deck_subscribe.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="deck_id" value="<?= $deck_id ?>">
-                        <button type="submit" class="btn btn-outline-primary">Subscribe</button>
-                    </form>
-                <?php endif; ?>
+                <?php if ($is_logged_in): ?>
+                    <!-- Logged-in user actions -->
+                    <?php if ($is_subscribed): ?>
+                        <button class="btn btn-outline-secondary" disabled>Subscribed</button>
+                    <?php elseif ($is_contributor_other_role): ?>
+                        <button class="btn btn-outline-secondary" disabled>Collaborator</button>
+                    <?php else: ?>
+                        <form action="classes/deck_subscribe.php" method="POST" style="display:inline;">
+                            <input type="hidden" name="deck_id" value="<?= $deck_id ?>">
+                            <button type="submit" class="btn btn-outline-primary">Subscribe</button>
+                        </form>
+                    <?php endif; ?>
 
-                <form action="classes/deck_fork.php" method="POST" style="display:inline;">
-                    <input type="hidden" name="deck_id" value="<?= $deck_id ?>">
-                    <button type="submit" class="btn btn-outline-success">Fork</button>
-                </form>
+                    <form action="classes/deck_fork.php" method="POST" style="display:inline;">
+                        <input type="hidden" name="deck_id" value="<?= $deck_id ?>">
+                        <button type="submit" class="btn btn-outline-success">Fork</button>
+                    </form>
+                <?php else: ?>
+                    <!-- Guest user actions -->
+                    <a href="land_login.php" class="btn btn-outline-primary">Log in to Subscribe</a>
+                    <a href="land_login.php" class="btn btn-outline-success">Log in to Fork</a>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
 
     <div class="readme-box">
-        <div class="readme-box-header">README.md</div>
-        <?php if (!empty($deck["description"])): ?>
-            <?= nl2br(htmlspecialchars($deck["description"])) ?>
-        <?php else: ?>
-            <span class="text-muted">No description provided for this deck.</span>
-        <?php endif; ?>
+        <div class="readme-box-header">Description</div>
+        <div class="readme-box-content"><?php if (!empty($deck["description"])): ?><?= nl2br(htmlspecialchars(trim($deck["description"]))) ?><?php else: ?><span class="text-muted">No description provided for this deck.</span><?php endif; ?></div>
     </div>
 
     <h5 class="mb-3">Card Preview</h5>
@@ -244,31 +258,15 @@ $cards_result = $stmt3->get_result();
         <tbody>
             <?php if ($cards_result->num_rows > 0) {
                 while ($card = $cards_result->fetch_assoc()) {
-                    $question = mb_substr(
-                        htmlspecialchars($card["question"]),
-                        0,
-                        100,
-                    );
-                    $answer = mb_substr(
-                        htmlspecialchars($card["answer"]),
-                        0,
-                        100,
-                    );
-                    $difficulty = htmlspecialchars(
-                        $card["difficulty"] ?? "medium",
-                    );
-                    $card_type = htmlspecialchars(
-                        $card["card_type"] ?? "basic",
-                    );
+                    $question = mb_substr(htmlspecialchars($card["question"]), 0, 100);
+                    $answer = mb_substr(htmlspecialchars($card["answer"]), 0, 100);
+                    $difficulty = htmlspecialchars($card["difficulty"] ?? "medium");
+                    $card_type = htmlspecialchars($card["card_type"] ?? "basic");
                     echo "<tr>";
                     echo "<td>" . $question . "</td>";
                     echo "<td>" . $answer . "</td>";
                     echo "<td>" . $card_type . "</td>";
-                    echo '<td><span class="badge badge-difficulty-' .
-                        $difficulty .
-                        '">' .
-                        $difficulty .
-                        "</span></td>";
+                    echo '<td><span class="badge badge-difficulty-' . $difficulty . '">' . $difficulty . "</span></td>";
                     echo "</tr>";
                 }
             } else {
@@ -279,9 +277,7 @@ $cards_result = $stmt3->get_result();
 
     <?php if ($deck["total_cards"] > 5): ?>
         <p class="repo-banner-meta">
-            Showing 5 of <?= intval(
-                $deck["total_cards"],
-            ) ?> cards. Fork or subscribe to see the rest.
+            Showing 5 of <?= intval($deck["total_cards"]) ?> cards. Fork or subscribe to see the rest.
         </p>
     <?php endif; ?>
 

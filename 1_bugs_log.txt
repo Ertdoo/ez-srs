@@ -1,1 +1,2 @@
 14/6/26: when studying a deck, in study.php it shows 20, when i click into it new turns to 10 in study_deck.php, then after that when i spam good until its complete no card shows up on screen then when i exit it says there is still 20 more due cards, but when i click back into it is complete. Furthermore,all the cards from learning pile also disappear? further more i dont think anki does through it due, learning, new, only moving on until each pile is completed
+hello there from the hackintosh

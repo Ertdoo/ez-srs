@@ -1,5 +1,6 @@
 <?php
 session_start();
+// deck_fork.php - Fork a public deck
 $conn = include __DIR__ . "/../connect.php";
 
 if (!isset($_SESSION["user_id"])) {
@@ -13,12 +14,12 @@ $deck_id = isset($_POST["deck_id"]) ? (int) $_POST["deck_id"] : 0;
 
 if ($deck_id <= 0) {
     $_SESSION["deck_view_error"] = "Invalid deck, matey!";
-    header("Location: ../view-deck.php");
+    header("Location: ../deck_view.php");
     exit();
 }
 
 // Fetch the source deck
-$deck_query = "SELECT title, description FROM decks WHERE id = ?";
+$deck_query = "SELECT title, description, is_public FROM decks WHERE id = ?";
 $stmt = $conn->prepare($deck_query);
 $stmt->bind_param("i", $deck_id);
 $stmt->execute();
@@ -26,7 +27,14 @@ $source_deck = $stmt->get_result()->fetch_assoc();
 
 if (!$source_deck) {
     $_SESSION["deck_view_error"] = "Deck not found, matey!";
-    header("Location: ../public-decks.php");
+    header("Location: ../deck_browse.php");
+    exit();
+}
+
+// Check if deck is public
+if (!$source_deck["is_public"]) {
+    $_SESSION["deck_view_error"] = "This deck is private, matey!";
+    header("Location: ../deck_browse.php");
     exit();
 }
 
@@ -49,11 +57,12 @@ try {
         VALUES (?, ?, ?, 0)
     ";
     $stmt2 = $conn->prepare($insert_deck_query);
+    $description = $source_deck["description"] ?? '';
     $stmt2->bind_param(
         "iss",
         $user_id,
         $new_title,
-        $source_deck["description"],
+        $description,
     );
     $stmt2->execute();
     $new_deck_id = $conn->insert_id;
@@ -73,14 +82,17 @@ try {
     $stmt4 = $conn->prepare($insert_card_query);
 
     while ($card = $cards_result->fetch_assoc()) {
+        $media_url = $card["media_url"] ?? null;
+        $difficulty = $card["difficulty"] ?? 'medium';
+
         $stmt4->bind_param(
             "isssss",
             $new_deck_id,
             $card["question"],
             $card["answer"],
             $card["card_type"],
-            $card["media_url"],
-            $card["difficulty"],
+            $media_url,
+            $difficulty,
         );
         $stmt4->execute();
     }
@@ -89,11 +101,11 @@ try {
 
     $_SESSION["deck_create_success"] =
         "Deck forked successfully, matey! It's now in yer own collection.";
-    header("Location: ../create_deck.php");
+    header("Location: ../user_dashboard.php");
     exit();
 } catch (Exception $e) {
     $conn->rollback();
     $_SESSION["deck_view_error"] = "Couldn't fork this deck, matey! Try again.";
-    header("Location: ../view-deck.php?id=" . $deck_id);
+    header("Location: ../deck_view.php?id=" . $deck_id);
     exit();
 }

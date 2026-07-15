@@ -1,5 +1,6 @@
 <?php
 session_start();
+// deck_subscribe.php - Subscribe to a public deck
 $conn = include __DIR__ . "/../connect.php";
 
 if (!isset($_SESSION["user_id"])) {
@@ -13,12 +14,12 @@ $deck_id = isset($_POST["deck_id"]) ? (int) $_POST["deck_id"] : 0;
 
 if ($deck_id <= 0) {
     $_SESSION["deck_view_error"] = "Invalid deck, matey!";
-    header("Location: ../view-deck.php");
+    header("Location: ../deck_view.php");
     exit();
 }
 
-// Make sure the deck exists and is public (or owned by someone else - basic sanity check)
-$check_query = "SELECT id, user_id FROM decks WHERE id = ?";
+// Make sure the deck exists and is public
+$check_query = "SELECT id, user_id, is_public FROM decks WHERE id = ?";
 $stmt = $conn->prepare($check_query);
 $stmt->bind_param("i", $deck_id);
 $stmt->execute();
@@ -26,13 +27,20 @@ $deck = $stmt->get_result()->fetch_assoc();
 
 if (!$deck) {
     $_SESSION["deck_view_error"] = "Deck not found, matey!";
-    header("Location: ../public-decks.php");
+    header("Location: ../deck_browse.php");
+    exit();
+}
+
+// Check if deck is public
+if (!$deck["is_public"]) {
+    $_SESSION["deck_view_error"] = "This deck is private, matey!";
+    header("Location: ../deck_browse.php");
     exit();
 }
 
 if ($deck["user_id"] == $user_id) {
     $_SESSION["deck_view_error"] = "Ye already own this deck, matey!";
-    header("Location: ../view-deck.php?id=" . $deck_id);
+    header("Location: ../deck_view.php?id=" . $deck_id);
     exit();
 }
 
@@ -47,7 +55,7 @@ $existing = $stmt2->get_result()->fetch_assoc();
 if ($existing) {
     $_SESSION["deck_view_error"] =
         "Ye already have a relationship with this deck, matey!";
-    header("Location: ../view-deck.php?id=" . $deck_id);
+    header("Location: ../deck_view.php?id=" . $deck_id);
     exit();
 }
 
@@ -66,5 +74,5 @@ if ($stmt3->execute()) {
     $_SESSION["deck_view_error"] = "Couldn't subscribe ye, matey! Try again.";
 }
 
-header("Location: ../view-deck.php?id=" . $deck_id);
+header("Location: ../user_dashboard.php");
 exit();

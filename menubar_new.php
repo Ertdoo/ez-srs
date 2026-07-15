@@ -55,40 +55,16 @@ $current = basename(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)); ?>
           <a class="nav-link<?php echo $current === "deck_create.php"
               ? " active-section"
               : ""; ?>" href="deck_create.php" style="color: MediumSeaGreen">Create new deck</a>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?php echo $current ===
-                "land_browse.php" || $current === "decks.php"
-                ? " active-section"
-                : ""; ?>" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Explore decks
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="exploreDropdown">
-              <li><a class="dropdown-item" href="deck_browse.php">All Decks</a></li>
-              <li><a class="dropdown-item" href="deck_browse.php?filter=popular">Popular</a></li>
-              <li><a class="dropdown-item" href="deck_browse.php?filter=recent">Recently Added</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="decks.php">My Decks</a></li>
-            </ul>
+          <li class="nav-item">
+            <a class="nav-link<?php echo $current === 'deck_browse.php' ? ' active-section' : ''; ?>" href="deck_browse.php">Explore Decks</a>
           </li>
           <a class="nav-link<?php echo $current === "land_about.php"
               ? " active-section"
               : ""; ?>" href="land_about.php">About</a>
         <?php else: ?>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?php echo $current ===
-                "deck_browse.php" || $current === "decks.php"
-                ? " active-section"
-                : ""; ?>" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Explore decks
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="exploreDropdown">
-              <li><a class="dropdown-item" href="deck_browse.php">All Decks</a></li>
-              <li><a class="dropdown-item" href="deck_browse.php?filter=popular">Popular</a></li>
-              <li><a class="dropdown-item" href="deck_browse.php?filter=recent">Recently Added</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="decks.php">My Decks</a></li>
-            </ul>
-          </li>
+        <li class="nav-item">
+          <a class="nav-link<?php echo $current === 'deck_browse.php' ? ' active-section' : ''; ?>" href="deck_browse.php">Explore Decks</a>
+        </li>
           <a class="nav-link<?php echo $current === "land_about.php"
               ? " active-section"
               : ""; ?>" href="land_about.php">About</a>

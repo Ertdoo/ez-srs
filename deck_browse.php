@@ -1,14 +1,5 @@
 <?php $conn = include "connect.php";
 
-if (isset($_SESSION["username"])) {
-    $username = $_SESSION["username"];
-    $user_id = $_SESSION["user_id"];
-} else {
-    die(
-        '<br><h1>Yer not logged in matey!</h1><br><a href="land_login.php">Go to login</a>'
-    );
-}
-
 // Pagination setup
 $decks_per_page = 12;
 $page = isset($_GET["page"]) ? max(1, (int) $_GET["page"]) : 1;
@@ -173,11 +164,11 @@ $result = $stmt->get_result();
                                 "M j, Y",
                                 strtotime($row["created_at"]),
                             );
-                            echo '<tr class="repo-row" onclick="window.location=\'view-deck.php?id=' .
+                            echo '<tr class="repo-row" onclick="window.location=\'deck_view.php?id=' .
                                 $deck_id .
                                 '\'">';
                             echo "<td>";
-                            echo '<a href="view-deck.php?id=' .
+                            echo '<a href="deck_view.php?id=' .
                                 $deck_id .
                                 '" class="repo-title">' .
                                 $title .
