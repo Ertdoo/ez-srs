@@ -7,7 +7,7 @@ Anki-style scheduling algorithm
 ## Features
 - User accounts (register/login) with per-user daily new-card limits
 - Create and browse decks, public or private
-- Cards support basic Q&A, cloze, and image types
+- Cards support basic Q&A, cloze, no image types yet
 - Deck collaboration: invite contributors as owner/editor/viewer
 - Card proposals (git style): contributors can propose add/edit/delete changes to shared decks,
   which the owner can merge or reject
