@@ -79,30 +79,6 @@ $current = basename(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)); ?>
         </li> -->
       </ul>
 
-      <div class="navbar-nav">
-        <div class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <span id="theme-icon" class="me-1"></span> Theme
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li>
-              <button class="dropdown-item theme-option" data-theme="dark">
-                <span class="me-2"></span> Dark Theme
-              </button>
-            </li>
-            <li>
-              <button class="dropdown-item theme-option" data-theme="light">
-                <span class="me-2"></span> Light Theme
-              </button>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <button class="dropdown-item theme-option" data-theme="auto">
-                <span class="me-2"></span> Auto (System)
-              </button>
-            </li>
-          </ul>
-        </div>
 
 
       <!-- Login/Logout Buttons -->

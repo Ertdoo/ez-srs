@@ -19,14 +19,12 @@
     <link href="./css/study_carousel.css" rel="stylesheet">
     <link href="./css/a_themes.css" rel="stylesheet">
 
-    <link rel="apple-touch-icon" href="./assets/img/favicons/apple-touch-icon.png" sizes="180x180">
-    <link rel="icon" href="./assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
-    <link rel="icon" href="./assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
-    <link rel="manifest" href="./assets/img/favicons/manifest.json">
-    <link rel="mask-icon" href="./assets/img/favicons/safari-pinned-tab.svg" color="#712cf9">
-    <link rel="icon" href="./assets/img/favicons/favicon.ico">
-    <meta name="theme-color" content="#712cf9">
-    
+    <link rel="apple-touch-icon" href="/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png">
+    <link rel="icon" href="/assets/img/favicons/favicon.ico">
+    <link rel="manifest" href="/assets/img/favicons/manifest.json">
+
     <!-- google fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -40,12 +38,14 @@
     <!-- Include Summernote CSS and JS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs5.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs5.min.js"></script>
+
+
 </head>
 <body">
     <main class="pt-5">
         <div class="container marking">
-        
+
         <?php
-            
+
             include_once "menubar_new.php";
         ?>

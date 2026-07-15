@@ -1,6 +1,6 @@
 <?php include ("connect.php"); ?>
-<?php 
-/* 
+<?php
+/*
 add_card_action.php
 */
 if (isset($_SESSION['username'])) {
@@ -9,19 +9,19 @@ if (isset($_SESSION['username'])) {
     header('Location: login_invalid.php');
     exit;
 }
-// 
-function processTags($conn, $card_id, $tags_string, $user_id) {
+
+function processTags($conn, $card_id, $tags_string, $user_id) { // checks if tags are valid and adds them to the card_tags table
     $tags = explode(',', $tags_string); // makes array from csv
     $tags = array_filter($tags);
     foreach ($tags as $tag_name) {
         if (empty($tag_name)) continue;
-        
+
         // Check if tag exists for this user
         $stmt = $conn->prepare("SELECT id FROM tags WHERE name = ? AND user_id = ?");
         $stmt->bind_param("si", $tag_name, $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result->num_rows > 0) {
             $tag = $result->fetch_assoc();
             $tag_id = $tag['id'];
@@ -32,7 +32,7 @@ function processTags($conn, $card_id, $tags_string, $user_id) {
             $stmt->execute();
             $tag_id = $conn->insert_id;
         }
-        
+
         // Link tag to card
         $stmt = $conn->prepare("INSERT IGNORE INTO card_tags (card_id, tag_id) VALUES (?, ?)");
         $stmt->bind_param("ii", $card_id, $tag_id);
@@ -85,11 +85,11 @@ $stmt_insert->bind_param("issss", $deck_id, $form_front, $form_back, $form_cardt
 
 if ($stmt_insert->execute()) {
     $new_card_id = $conn->insert_id; // GET THE NEW CARD ID!
-    
+
     if (!empty($form_tags)) {
         processTags($conn, $new_card_id, $form_tags, $_SESSION['user_id']);
     }
-    
+
     $_SESSION['success'] = "Card added successfully!";
     header("Location: deck_details.php?id=$deck_id");
     exit;

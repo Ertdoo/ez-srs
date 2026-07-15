@@ -1,5 +1,32 @@
 <?php
 $conn = include "connect.php";
+/* deck_create_action.php
+ * - Strings (text): Used for variables like $form_deck_title, $form_deck_description,
+ * and $form_collaborators. Text data types are necessary to accommodate alphanumeric
+ * user input of arbitrary length while allowing string operations like trim() and explode().
+ * - Integers (numeric): Used for $user_id, $new_deck_id, and $collab_user_id. Type casting
+ * to (int) is explicitly enforced to match the relational database schema primary keys,
+ * optimizing lookup performance and ensuring mathematical validity.
+ * - Integers as Booleans: The $form_public variable acts as a boolean indicator (0 or 1).
+ * This ensures compact bitwise storage efficiency within the database while allowing clean
+ * conditional evaluation.
+
+ * - Superglobals ($_SESSION, $_POST): Utilized because they provide globally accessible
+ * key-value associative arrays. $_SESSION safely preserves user state and flash messages
+ * across HTTP requests, while $_POST safely encapsulates incoming client-side form data.
+ * - Arrays ($collab_usernames): Used to temporarily store split collaborator strings.
+ * An indexed array allows the script to leverage high-performance array traversal methods
+ * like array_map() and foreach loops to iterate dynamically through variable amounts of input data.
+
+ * - Relational Database MySQL ($conn): Chosen as the persistent data source to ensure ACID
+ * compliance, referential integrity, and efficient indexing across interconnected tables
+ * ('decks', 'users', 'deck_contributors').
+ * - Prepared Statements ($conn->prepare): Employed for all SQL queries. Separating SQL code
+ * from data parameters strictly eliminates SQL Injection vulnerabilities, ensuring secure
+ * data transactions.
+ * - Input Validation & Sanitization: trim() is utilized to remove accidental whitespace,
+ * and empty() checks prevent null pointer exceptions or empty database rows, meeting robustness criteria.
+ */
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {

@@ -31,7 +31,7 @@
  $delete_stmt->bind_param("ii", $deck_id, $user_id);
  $delete_stmt->execute();
 
- // ... redirect back with success message
+ // redirect back with success message
     header("Location: deck_create.php");
     exit();
 }
