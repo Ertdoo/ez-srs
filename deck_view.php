@@ -53,7 +53,7 @@ $stmt->execute();
 $deck = $stmt->get_result()->fetch_assoc();
 
 if (!$deck) {
-    die('<br><h1>Deck not found, matey!</h1><br><a href="public-decks.php">Go back to browsing</a>');
+    die('<br><h1>Deck not found, matey!</h1><br><a href="deck_browse.php">Go back to browsing</a>');
 }
 
 // Optional: Block guests from viewing private decks
@@ -281,7 +281,7 @@ $cards_result = $stmt3->get_result();
         </p>
     <?php endif; ?>
 
-    <a href="public-decks.php" class="btn btn-link" style="color:#a0a8c8;">&#8592; Back to browsing</a>
+    <a href="deck_browse.php" class="btn btn-link" style="color:#a0a8c8;">&#8592; Back to browsing</a>
 
 </div>
 

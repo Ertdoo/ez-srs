@@ -48,7 +48,7 @@ $current = basename(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)); ?>
         <?php if (isset($_SESSION["username"])): ?>
           <a class="nav-link<?php echo $current === "study.php"
               ? " active-section"
-              : ""; ?>" href="study.php" style="color: Coral">Study!</a>
+              : ""; ?>" href="study.php" style="color: Tomato">Study!</a>
           <a class="nav-link<?php echo $current === "decks.php"
               ? " active-section"
               : ""; ?>" href="decks.php" style="color: Orange">Manage decks</a>
