@@ -329,9 +329,15 @@
              FROM cards c
              JOIN decks d ON c.deck_id = d.id
              LEFT JOIN (
-                 SELECT card_id, MAX(id) AS max_id FROM study_sessions WHERE user_id = ? GROUP BY card_id
-             ) latest ON latest.card_id = c.id
-             LEFT JOIN study_sessions ss ON ss.id = latest.max_id
+                 SELECT s1.card_id, s1.interval_days
+                 FROM study_sessions s1
+                 WHERE s1.user_id = ?
+                   AND s1.reviewed_at = (
+                       SELECT MAX(s2.reviewed_at)
+                       FROM study_sessions s2
+                       WHERE s2.card_id = s1.card_id AND s2.user_id = s1.user_id
+                   )
+             ) ss ON ss.card_id = c.id
              WHERE d.user_id = ?
                 OR d.id IN (
                     SELECT deck_contributors.deck_id
@@ -348,7 +354,6 @@
             $card_states[$row['state']] = (int) $row['cnt'];
         }
         $stmt->close();
-
         // --- Card counts by state, PER DECK (for the pie chart dropdown) (INCLUDES COLLABORATOR DECKS) ---
         $deck_states = [];
         $stmt = $conn->prepare(
