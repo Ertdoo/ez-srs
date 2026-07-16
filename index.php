@@ -33,7 +33,7 @@
         </div>
 
         <div class="d-flex justify-content-center gap-3">
-            <a href="register.php" class="btn btn-primary btn-lg px-4">Register</a>
+            <a href="land_register.php" class="btn btn-primary btn-lg px-4">Register</a>
             <a href="land_login.php" class="btn btn-outline-primary btn-lg px-4">Login</a>
         </div>
     </main>

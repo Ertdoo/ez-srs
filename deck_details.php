@@ -281,7 +281,15 @@ $cards_result = $cards_stmt->get_result();
                                         </td>
                                         <td class="text-end">
                                             <?php if ($can_edit): ?>
-                                                <a href="edit_card.php?id=<?= $card["id"] ?>" class="btn btn-sm btn-outline-primary">Edit</a>
+                                            <button type="button" class="btn btn-sm btn-outline-primary owner-edit-btn"
+                                                    data-card-id="<?= $card["id"] ?>"
+                                                    data-question="<?= htmlspecialchars($card["question"], ENT_QUOTES) ?>"
+                                                    data-answer="<?= htmlspecialchars($card["answer"], ENT_QUOTES) ?>"
+                                                    data-type="<?= htmlspecialchars($card["card_type"]) ?>"
+                                                    data-difficulty="<?= htmlspecialchars($card["difficulty"]) ?>"
+                                                    data-bs-toggle="modal" data-bs-target="#edit_card_modal">
+                                                Edit
+                                            </button>
                                             <?php endif; ?>
 
                                             <?php if ($is_editor): ?>
@@ -436,6 +444,56 @@ $cards_result = $cards_stmt->get_result();
             <button type="submit" form="singleCardForm" class="btn btn-primary" id="submitSingle">Add Card</button>
             <button type="submit" form="batchCardForm" class="btn btn-primary d-none" id="submitBatch">Add All Cards</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- EDIT CARD MODAL (Owner Only) -->
+    <div class="modal fade" id="edit_card_modal" tabindex="-1" aria-labelledby="editCardModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <form action="card_edit_action.php" method="POST">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editCardModalLabel">Edit Card</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" name="deck_id" value="<?= $deck_id ?>">
+              <input type="hidden" name="card_id" id="edit_modal_card_id">
+
+              <div class="mb-3">
+                <label class="form-label">Question *</label>
+                <textarea class="form-control" name="question" id="edit_modal_question" rows="3" maxlength="1000" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Answer *</label>
+                <textarea class="form-control" name="answer" id="edit_modal_answer" rows="3" maxlength="1000" required></textarea>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Card Type</label>
+                  <select class="form-select" name="card_type" id="edit_modal_card_type">
+                    <option value="basic">Basic</option>
+                    <option value="cloze">Cloze</option>
+                    <option value="image">Image</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Difficulty</label>
+                  <select class="form-select" name="difficulty" id="edit_modal_difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -711,6 +769,19 @@ $cards_result = $cards_stmt->get_result();
             dropContainer.addEventListener('drop', (e) => handleFile(e.dataTransfer.files[0]));
         }
     });
+
+    // Populate Owner Edit Modal
+    const ownerEditButtons = document.querySelectorAll('.owner-edit-btn');
+    ownerEditButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            document.getElementById('edit_modal_card_id').value = this.getAttribute('data-card-id');
+            document.getElementById('edit_modal_question').value = this.getAttribute('data-question');
+            document.getElementById('edit_modal_answer').value = this.getAttribute('data-answer');
+            document.getElementById('edit_modal_card_type').value = this.getAttribute('data-type');
+            document.getElementById('edit_modal_difficulty').value = this.getAttribute('data-difficulty');
+        });
+    });
     </script>
+
 
 <?php include "footer.php"; ?>
