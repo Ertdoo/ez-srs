@@ -173,12 +173,13 @@ include "header.php";
           $answer_display = htmlspecialchars($c["answer"]);
       }
       ?>
-  <div class="study-card d-none"
-       data-index="<?= $i ?>"
-       data-card-id="<?= (int) $c["id"] ?>"
-       data-ease="<?= floatval($c["ease_factor"]) ?>"
-       data-interval="<?= intval($c["interval_days"]) ?>"
-       data-queue="<?= htmlspecialchars($queue) ?>">
+    <div class="study-card d-none"
+        data-index="<?= $i ?>"
+        data-card-id="<?= (int) $c["id"] ?>"
+        data-ease="<?= floatval($c["ease_factor"]) ?>"
+        data-interval="<?= intval($c["interval_days"]) ?>"
+        data-next-due="<?= htmlspecialchars($c["next_due_date"] ?? '') ?>"
+        data-queue="<?= htmlspecialchars($queue) ?>">
 
     <div class="study-card-scene" id="scene-<?= $i ?>" onclick="flipCard()">
       <div class="card-inner">
@@ -267,6 +268,7 @@ function updateCardButtons(el) {
     const queue = el.dataset.queue;
     const ease = parseFloat(el.dataset.ease);
     const interval = parseInt(el.dataset.interval);
+    const nextDueStr = el.dataset.nextDue;
 
     const btnA = el.querySelector('.btn-again small');
     const btnH = el.querySelector('.btn-hard small');
@@ -280,9 +282,24 @@ function updateCardButtons(el) {
     } else { // review (due)
         const ivl = Math.max(1, interval);
         btnA.innerText = '10m';
-        btnH.innerText = formatInterval(Math.max(1, Math.round(ivl * 1.2)));
-        btnG.innerText = formatInterval(Math.max(1, Math.round(ivl * ease)));
-        btnE.innerText = formatInterval(Math.max(1, Math.round(ivl * ease * 1.3)));
+
+        // FIX: Calculate delayDays exactly like the backend
+        let delayDays = 0;
+        if (nextDueStr && nextDueStr !== '0000-00-00' && nextDueStr !== '') {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const dueDate = new Date(nextDueStr); dueDate.setHours(0,0,0,0);
+            const diffTime = today - dueDate;
+            delayDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+        }
+
+        // FIX: Match backend's exact formulas including the +1 protection
+        const hardIvl = Math.max(Math.round(ivl * 1.2), ivl + 1, 1);
+        const goodIvl = Math.max(Math.round((ivl + Math.floor(delayDays / 2)) * ease), hardIvl + 1, 1);
+        const easyIvl = Math.max(Math.round((ivl + delayDays) * ease * 1.3), goodIvl + 1, 1);
+
+        btnH.innerText = formatInterval(hardIvl);
+        btnG.innerText = formatInterval(goodIvl);
+        btnE.innerText = formatInterval(easyIvl);
     }
 }
 
@@ -418,7 +435,8 @@ async function rate(outcome) {
 
     if (queue === 'new') {
         if (outcome === 'again') { pushToLearning = true; newStep = 0; delayMs = 1 * 60 * 1000; }
-        else if (outcome === 'hard') { pushToLearning = true; newStep = 1; delayMs = 6 * 60 * 1000; }
+        // FIX: Hard keeps it at step 0, matching the backend's $newInterval = 0
+        else if (outcome === 'hard') { pushToLearning = true; newStep = 0; delayMs = 6 * 60 * 1000; }
         else if (outcome === 'good') { pushToLearning = true; newStep = 1; delayMs = 10 * 60 * 1000; }
         // easy skips learning and graduates instantly
     } else if (queue === 'learning' && interval === 0) {

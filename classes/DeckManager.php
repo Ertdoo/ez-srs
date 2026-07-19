@@ -69,7 +69,7 @@ class DeckManager
         $revRow = $revStmt->get_result()->fetch_assoc();
         $reviewsToday = isset($revRow["cnt"]) ? (int) $revRow["cnt"] : 0;
 
-        $dueFetchLimit = max(0, min(20, $reviewLimit - $reviewsToday));
+        $dueFetchLimit = max(0, $reviewLimit - $reviewsToday));
 
         $due = [];
         if ($dueFetchLimit > 0) {
